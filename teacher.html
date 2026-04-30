@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المعلمة — أشجان المنتشري</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #e8f7f7, #f0fafa);
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── HEADER ── */
+.page-header {
+  background: white; border-radius: 20px; padding: 20px 24px;
+  box-shadow: 0 8px 30px rgba(59,191,191,0.12);
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; animation: fadeUp 0.4s ease;
+}
+.page-header h1 { font-size:20px; font-weight:900; color:#2a9d9d; }
+.page-header p  { font-size:13px; color:#7f8c8d; margin-top:2px; }
+.header-badge { background:linear-gradient(135deg,#3BBFBF,#2a9d9d); color:white; padding:8px 18px; border-radius:20px; font-size:13px; font-weight:700; }
+
+/* ── STATS ── */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:20px; }
+.stat-card {
+  background:white; border-radius:16px; padding:18px 16px; text-align:center;
+  box-shadow:0 4px 16px rgba(59,191,191,0.1); animation:fadeUp 0.5s ease;
+}
+.stat-icon { font-size:28px; margin-bottom:6px; }
+.stat-num  { font-size:26px; font-weight:900; color:#2a9d9d; }
+.stat-lbl  { font-size:11px; color:#7f8c8d; font-weight:600; margin-top:2px; }
+
+/* ── FILTERS ── */
+.filters-card {
+  background:white; border-radius:16px; padding:18px 20px;
+  box-shadow:0 4px 16px rgba(59,191,191,0.1); margin-bottom:20px;
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  animation:fadeUp 0.55s ease;
+}
+.filters-card select,
+.filters-card input {
+  padding:10px 14px; border:2px solid #e8f0f0; border-radius:10px;
+  font-size:13px; background:#f4f8f8; outline:none; font-family:inherit;
+  color:#2c3e50; appearance:none; -webkit-appearance:none;
+}
+.filters-card select:focus,
+.filters-card input:focus { border-color:#3BBFBF; background:white; }
+.btn-filter { padding:10px 20px; background:linear-gradient(135deg,#3BBFBF,#2a9d9d); color:white; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+.btn-reset  { padding:10px 16px; background:#f4f8f8; border:2px solid #e8f0f0; border-radius:10px; font-size:13px; font-weight:700; color:#7f8c8d; cursor:pointer; font-family:inherit; }
+
+/* ── TABLE CARD ── */
+.table-card {
+  background:white; border-radius:16px;
+  box-shadow:0 4px 16px rgba(59,191,191,0.1);
+  overflow:hidden; animation:fadeUp 0.6s ease;
+}
+.table-top {
+  padding:16px 20px; border-bottom:2px solid #e8f7f7;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.table-top h2 { font-size:15px; font-weight:800; color:#2a9d9d; }
+.btn-export { padding:8px 16px; background:#27ae60; color:white; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { background:linear-gradient(135deg,#3BBFBF,#2a9d9d); }
+thead th { color:white; padding:12px 14px; text-align:right; font-weight:700; white-space:nowrap; }
+tbody tr { border-bottom:1px solid #f0f7f7; transition:background 0.15s; }
+tbody tr:hover { background:#f4fdfd; }
+tbody tr:last-child { border-bottom:none; }
+tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
+
+.badge {
+  display:inline-block; padding:3px 10px; border-radius:999px;
+  font-size:11px; font-weight:800;
+}
+.badge-ex   { background:#d5f5e3; color:#27ae60; }
+.badge-good { background:#d6eaf8; color:#2980b9; }
+.badge-fair { background:#fdebd0; color:#e67e22; }
+.badge-poor { background:#fadbd8; color:#e74c3c; }
+
+.btn-del {
+  padding:5px 12px; background:#fadbd8; color:#e74c3c;
+  border:none; border-radius:8px; font-size:12px; font-weight:700;
+  cursor:pointer; font-family:inherit; transition:all 0.2s;
+}
+.btn-del:hover { background:#e74c3c; color:white; }
+
+/* ── EMPTY / LOADING ── */
+.center-msg { text-align:center; padding:40px; color:#7f8c8d; font-size:14px; }
+.center-msg .icon { font-size:40px; margin-bottom:8px; }
+
+/* ── MODAL ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center; }
+.overlay.on { display:flex; }
+.modal { background:white; border-radius:20px; padding:30px 28px; max-width:320px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation:fadeUp 0.3s ease; }
+.modal .m-icon { font-size:44px; margin-bottom:10px; }
+.modal h3 { font-size:18px; font-weight:900; color:#2c3e50; margin-bottom:8px; }
+.modal p  { font-size:13px; color:#7f8c8d; margin-bottom:20px; }
+.modal-btns { display:flex; gap:10px; }
+.modal-btns button { flex:1; padding:12px; border:none; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.m-cancel  { background:#f4f8f8; color:#7f8c8d; border:2px solid #e8f0f0 !important; }
+.m-confirm { background:#e74c3c; color:white; }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px);
+  background:#2c3e50; color:white; padding:11px 22px; border-radius:10px;
+  font-size:13px; font-weight:700; transition:transform 0.3s; z-index:9999; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.ok   { background:#27ae60; }
+.toast.err  { background:#e74c3c; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div>
+    <h1>📊 لوحة المعلمة</h1>
+    <p>Ashjan Al-Montashri — English</p>
+  </div>
+  <div class="header-badge">🔐 لوحة التحكم</div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" id="s-total">—</div><div class="stat-lbl">إجمالي الطلاب</div></div>
+  <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-num" id="s-avg">—</div><div class="stat-lbl">متوسط النسبة</div></div>
+  <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-num" id="s-ex">—</div><div class="stat-lbl">ممتاز 90%+</div></div>
+  <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-num" id="s-poor">—</div><div class="stat-lbl">يحتاج دعم &lt;50%</div></div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-card">
+  <select id="f-grade" onchange="updateFCls()">
+    <option value="">جميع المراحل</option>
+    <option value="أول متوسط">أول متوسط</option>
+    <option value="ثاني متوسط">ثاني متوسط</option>
+    <option value="ثالث متوسط">ثالث متوسط</option>
+  </select>
+  <select id="f-class">
+    <option value="">جميع الفصول</option>
+  </select>
+  <select id="f-unit">
+    <option value="">جميع الوحدات</option>
+    <option value="Let's Celebrate">Let's Celebrate</option>
+    <option value="What is the weather like?">What is the weather like?</option>
+    <option value="Who used my toothpaste?">Who used my toothpaste?</option>
+  </select>
+  <input type="text" id="f-name" placeholder="🔍 بحث بالاسم...">
+  <button class="btn-filter" onclick="applyF()">تطبيق</button>
+  <button class="btn-reset"  onclick="resetF()">إعادة تعيين</button>
+</div>
+
+<!-- TABLE -->
+<div class="table-card">
+  <div class="table-top">
+    <h2 id="tbl-title">📋 نتائج الطلاب</h2>
+    <button class="btn-export" onclick="exportCSV()">📥 تصدير CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اسم الطالب</th>
+          <th>المرحلة</th>
+          <th>الفصل</th>
+          <th>الوحدة</th>
+          <th>الدرجة</th>
+          <th>النسبة</th>
+          <th>التاريخ</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body">
+        <tr><td colspan="9"><div class="center-msg"><div class="icon">⏳</div>جاري التحميل...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="m-icon">🗑️</div>
+    <h3>حذف السجل</h3>
+    <p>هل أنت متأكدة من حذف هذا السجل؟<br>لا يمكن التراجع عن هذا الإجراء.</p>
+    <div class="modal-btns">
+      <button class="m-cancel"  onclick="closeModal()">إلغاء</button>
+      <button class="m-confirm" onclick="doDelete()">حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://jrhhjvnmylwpdjklvcbf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyaGhqdm5teWx3cGRqa2x2Y2JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTc1NzYsImV4cCI6MjA5MzA3MzU3Nn0.iUnwwAp1bguKOdaIC97t5r3goEqaHzdpQXHm1hicdAY';
+
+const CLS_MAP = {
+  'أول متوسط':  ['Class A — الفصل أ','Class B — الفصل ب'],
+  'ثاني متوسط': ['Class A — الفصل أ','Class B — الفصل ب'],
+  'ثالث متوسط': ['Main Class — فصل واحد']
+};
+
+let allData=[], delId=null;
+
+async function load(){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/ashjan_results?select=id,student_name,grade,class,unit,score,total,created_at&order=created_at.desc`,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    allData=await r.json();
+    render(allData); updateStats(allData);
+  }catch{
+    document.getElementById('tbl-body').innerHTML=
+      '<tr><td colspan="9"><div class="center-msg"><div class="icon">❌</div>تعذر الاتصال بالخادم</div></td></tr>';
+  }
+}
+
+function updateStats(d){
+  document.getElementById('s-total').textContent=d.length;
+  if(!d.length){['s-avg','s-ex','s-poor'].forEach(id=>document.getElementById(id).textContent='0');return;}
+  const avg=d.reduce((s,r)=>s+(r.score/r.total*100),0)/d.length;
+  document.getElementById('s-avg').textContent=Math.round(avg)+'%';
+  document.getElementById('s-ex').textContent=d.filter(r=>r.score/r.total>=0.9).length;
+  document.getElementById('s-poor').textContent=d.filter(r=>r.score/r.total<0.5).length;
+}
+
+function render(d){
+  document.getElementById('tbl-title').textContent=`📋 نتائج الطلاب (${d.length})`;
+  if(!d.length){
+    document.getElementById('tbl-body').innerHTML=
+      '<tr><td colspan="9"><div class="center-msg"><div class="icon">📭</div>لا توجد نتائج</div></td></tr>';
+    return;
+  }
+  document.getElementById('tbl-body').innerHTML=d.map((r,i)=>{
+    const pct=Math.round(r.score/r.total*100);
+    const bc=pct>=90?'badge-ex':pct>=70?'badge-good':pct>=50?'badge-fair':'badge-poor';
+    const dt=new Date(r.created_at).toLocaleDateString('ar-SA',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${r.student_name}</strong></td>
+      <td>${r.grade}</td>
+      <td>${r.class}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">${r.unit}</td>
+      <td>${r.score}/${r.total}</td>
+      <td><span class="badge ${bc}">${pct}%</span></td>
+      <td>${dt}</td>
+      <td><button class="btn-del" onclick="askDel('${r.created_at}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateFCls(){
+  const g=document.getElementById('f-grade').value;
+  const cs=document.getElementById('f-class');
+  cs.innerHTML='<option value="">جميع الفصول</option>';
+  if(g&&CLS_MAP[g]) CLS_MAP[g].forEach(c=>cs.innerHTML+=`<option value="${c}">${c}</option>`);
+}
+
+function applyF(){
+  const g=document.getElementById('f-grade').value;
+  const c=document.getElementById('f-class').value;
+  const u=document.getElementById('f-unit').value;
+  const n=document.getElementById('f-name').value.trim().toLowerCase();
+  let d=allData;
+  if(g) d=d.filter(r=>r.grade===g);
+  if(c) d=d.filter(r=>r.class===c);
+  if(u) d=d.filter(r=>r.unit===u);
+  if(n) d=d.filter(r=>r.student_name.toLowerCase().includes(n));
+  render(d); updateStats(d);
+}
+
+function resetF(){
+  ['f-grade','f-unit','f-name'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-class').innerHTML='<option value="">جميع الفصول</option>';
+  render(allData); updateStats(allData);
+}
+
+function askDel(id){ delId=id; document.getElementById('overlay').classList.add('on'); }
+function closeModal(){ delId=null; document.getElementById('overlay').classList.remove('on'); }
+
+
+async function doDelete(){
+  if(!delId)return;
+  closeModal();
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?created_at=eq.'+encodeURIComponent(delId),{
+      method:'DELETE',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'}
+    });
+    if(r.ok||r.status===204){ toast('✅ تم الحذف بنجاح','ok'); await load(); }
+    else{ toast('❌ فشل الحذف '+r.status,'err'); }
+  }catch(e){ toast('❌ تعذر الاتصال','err'); }
+}
+
+function exportCSV(){
+  const h=['#','اسم الطالب','المرحلة','الفصل','الوحدة','الدرجة','المجموع','النسبة','التاريخ'];
+  const rows=allData.map((r,i)=>[i+1,r.student_name,r.grade,r.class,r.unit,r.score,r.total,Math.round(r.score/r.total*100)+'%',new Date(r.created_at).toLocaleDateString('ar-SA')]);
+  const csv='\uFEFF'+[h,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`نتائج_${new Date().toLocaleDateString('ar-SA')}.csv`;
+  a.click();
+}
+
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>
