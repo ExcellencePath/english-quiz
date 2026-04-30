@@ -287,14 +287,14 @@ function resetF(){
   render(allData); updateStats(allData);
 }
 
-function askDel(id){ delId=id; document.getElementById('overlay').classList.add('on'); }
+function askDel(id){ delId=parseInt(id); document.getElementById('overlay').classList.add('on'); }
 function closeModal(){ delId=null; document.getElementById('overlay').classList.remove('on'); }
 
 async function doDelete(){
   if(!delId)return;
   closeModal();
   try{
-    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?id=eq.'+delId,{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?id=eq.'+encodeURIComponent(delId),{
       method:'DELETE',
       headers:{
         'apikey':SUPABASE_KEY,
