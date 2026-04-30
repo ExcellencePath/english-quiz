@@ -223,7 +223,7 @@ function render(d){
     rows += '<td>'+r.score+'/'+r.total+'</td>';
     rows += '<td><span class="badge '+bc+'">'+pct+'%</span></td>';
     rows += '<td>'+dt+'</td>';
-    rows += '<td><button class="btn-del" onclick="askDel(\"'+r.created_at+'\")">🗑️</button></td>';
+    rows += '<td><button class="btn-del" onclick="askDel(this.dataset.id)" data-id="'+r.created_at+'">🗑️</button></td>';
     rows += '</tr>';
   }
   document.getElementById('tbl-body').innerHTML = rows;
