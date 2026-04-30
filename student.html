@@ -322,17 +322,16 @@ function loadQ(){
 }
 
 function submitAnswer(){
-  if(selected===null){alert('Please select an answer first!');return;}
+  if(selected===null){alert("Please select an answer first!");return;}
   answered=true;
   const q=qs[qi];
-  document.querySelectorAll('.opt').forEach((b,i)=>{
+  document.querySelectorAll(".opt").forEach((b,i)=>{
     b.disabled=true;
-    if(i===q.ans) b.classList.add('correct');
-    else if(i===selected) b.classList.add('wrong');
+    if(i===selected) b.classList.add("selected");
   });
   if(selected===q.ans) score++;
-  const sb=document.getElementById('submit-btn');
-  sb.textContent=qi<qs.length-1?'Next ➜':'See Results 🏁';
+  const sb=document.getElementById("submit-btn");
+  sb.textContent=qi<qs.length-1?"Next u279C":"Submit Test u2705";
   sb.onclick=nextOrFinish;
 }
 
@@ -343,29 +342,20 @@ function nextOrFinish(){
 }
 
 function showResult(){
-  document.getElementById('pg-quiz').style.display='none';
-  document.getElementById('pg-result').style.display='block';
-  const pct=Math.round(score/qs.length*100);
-  let emoji,title,msg,mc,rc;
-  if(pct>=90){emoji='🏆';title='Excellent!';msg='Outstanding! Keep it up 🌟';mc='msg-excellent';rc='#27ae60';}
-  else if(pct>=70){emoji='🌟';title='Very Good!';msg='Great job! A little more practice 💪';mc='msg-good';rc='#2980b9';}
-  else if(pct>=50){emoji='👍';title='Good Effort!';msg='You can do better with more review 📖';mc='msg-fair';rc='#e67e22';}
-  else{emoji='📚';title='Keep Practicing!';msg='Review the unit and try again 🔁';mc='msg-poor';rc='#e74c3c';}
-  document.getElementById('res-emoji').textContent=emoji;
-  document.getElementById('res-title').textContent=title;
-  document.getElementById('res-sub').textContent=`${score} correct out of ${qs.length}`;
-  document.getElementById('res-big').textContent=`${score}/${qs.length}`;
-  const ring=document.getElementById('score-ring');
-  ring.style.borderColor=rc; ring.style.color=rc;
-  document.getElementById('res-msg').textContent=msg;
-  document.getElementById('res-msg').className='result-msg '+mc;
-  document.getElementById('result-badge').textContent='👤 '+student.name;
-  document.getElementById('res-info').innerHTML=
-    `<strong>Name:</strong> ${student.name}<br>
-     <strong>Grade:</strong> ${student.grade}<br>
-     <strong>Class:</strong> ${student.cls}<br>
-     <strong>Unit:</strong> ${student.unit}<br>
-     <strong>Score:</strong> ${score}/${qs.length} (${pct}%)`;
+  document.getElementById("pg-quiz").style.display="none";
+  document.getElementById("pg-result").style.display="block";
+  document.getElementById("res-emoji").textContent="u2705";
+  document.getElementById("res-title").textContent="Test Submitted!";
+  document.getElementById("res-sub").textContent="Your answers have been sent to your teacher.";
+  document.getElementById("res-big").textContent="u2713";
+  document.getElementById("result-badge").textContent="uD83DuDC64 "+student.name;
+  document.getElementById("res-info").innerHTML=
+    "<strong>Name:</strong> "+student.name+"<br>"
+    +"<strong>Grade:</strong> "+student.grade+"<br>"
+    +"<strong>Class:</strong> "+student.cls+"<br>"
+    +"<strong>Unit:</strong> "+student.unit;
+  document.getElementById("res-msg").textContent="uD83CuDF93 Your teacher will share your results soon.";
+  document.getElementById("res-msg").className="result-msg msg-good";
   saveResult();
 }
 
