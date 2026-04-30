@@ -290,18 +290,20 @@ function resetF(){
 function askDel(id){ delId=parseInt(id); document.getElementById('overlay').classList.add('on'); }
 function closeModal(){ delId=null; document.getElementById('overlay').classList.remove('on'); }
 
+
+    });
+    if(r.ok||r.status===204){ toast('✅ تم الحذف بنجاح','ok'); await load(); }
+    else{ toast('❌ فشل الحذف '+r.status,'err'); }
+  }catch(e){ toast('❌ تعذر الاتصال','err'); }
+}
+
 async function doDelete(){
   if(!delId)return;
   closeModal();
   try{
-    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?id=eq.'+encodeURIComponent(delId),{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?id=eq.'+delId,{
       method:'DELETE',
-      headers:{
-        'apikey':SUPABASE_KEY,
-        'Authorization':'Bearer '+SUPABASE_KEY,
-        'Content-Type':'application/json',
-        'Prefer':'return=minimal'
-      }
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'}
     });
     if(r.ok||r.status===204){ toast('✅ تم الحذف بنجاح','ok'); await load(); }
     else{ toast('❌ فشل الحذف '+r.status,'err'); }
