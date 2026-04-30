@@ -94,17 +94,7 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
 .center-msg { text-align:center; padding:40px; color:#7f8c8d; font-size:14px; }
 .center-msg .icon { font-size:40px; margin-bottom:8px; }
 
-/* ── MODAL ── */
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center; }
-.overlay.on { display:flex; }
-.modal { background:white; border-radius:20px; padding:30px 28px; max-width:320px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation:fadeUp 0.3s ease; }
-.modal .m-icon { font-size:44px; margin-bottom:10px; }
-.modal h3 { font-size:18px; font-weight:900; color:#2c3e50; margin-bottom:8px; }
-.modal p  { font-size:13px; color:#7f8c8d; margin-bottom:20px; }
-.modal-btns { display:flex; gap:10px; }
-.modal-btns button { flex:1; padding:12px; border:none; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
-.m-cancel  { background:#f4f8f8; color:#7f8c8d; border:2px solid #e8f0f0 !important; }
-.m-confirm { background:#e74c3c; color:white; }
+
 
 /* ── TOAST ── */
 .toast {
@@ -176,7 +166,7 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
           <th>الدرجة</th>
           <th>النسبة</th>
           <th>التاريخ</th>
-          <th>حذف</th>
+          
         </tr>
       </thead>
       <tbody id="tbl-body">
@@ -186,10 +176,6 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
   </div>
 </div>
 
-<!-- DELETE MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <div class="m-icon">🗑️</div>
     <h3>حذف السجل</h3>
     <p>هل أنت متأكدة من حذف هذا السجل؟<br>لا يمكن التراجع عن هذا الإجراء.</p>
     <div class="modal-btns">
@@ -256,7 +242,6 @@ function render(d){
       <td>${r.score}/${r.total}</td>
       <td><span class="badge ${bc}">${pct}%</span></td>
       <td>${dt}</td>
-      <td><button class="btn-del" onclick="askDel('${r.created_at}')">🗑️</button></td>
     </tr>`;
   }).join('');
 }
@@ -287,22 +272,7 @@ function resetF(){
   render(allData); updateStats(allData);
 }
 
-function askDel(id){ delId=id; document.getElementById('overlay').classList.add('on'); }
-function closeModal(){ delId=null; document.getElementById('overlay').classList.remove('on'); }
 
-
-async function doDelete(){
-  if(!delId)return;
-  closeModal();
-  try{
-    const r=await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?created_at=eq.'+encodeURIComponent(delId),{
-      method:'DELETE',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'}
-    });
-    if(r.ok||r.status===204){ toast('✅ تم الحذف بنجاح','ok'); await load(); }
-    else{ toast('❌ فشل الحذف '+r.status,'err'); }
-  }catch(e){ toast('❌ تعذر الاتصال','err'); }
-}
 
 function exportCSV(){
   const h=['#','اسم الطالب','المرحلة','الفصل','الوحدة','الدرجة','المجموع','النسبة','التاريخ'];
