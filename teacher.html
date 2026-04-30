@@ -256,7 +256,7 @@ function render(d){
       <td>${r.score}/${r.total}</td>
       <td><span class="badge ${bc}">${pct}%</span></td>
       <td>${dt}</td>
-      <td><button class="btn-del" onclick="askDel(${r.id})">🗑️</button></td>
+      <td><button class="btn-del" onclick="askDel('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
 }
