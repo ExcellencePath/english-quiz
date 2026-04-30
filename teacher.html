@@ -68,6 +68,23 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
 
 .center-msg { text-align:center; padding:40px; color:#7f8c8d; font-size:14px; }
 .center-msg .icon { font-size:40px; margin-bottom:8px; }
+
+.btn-del { padding:5px 12px; background:#fadbd8; color:#e74c3c; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.2s; }
+.btn-del:hover { background:#e74c3c; color:white; }
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center; }
+.overlay.on { display:flex; }
+.modal { background:white; border-radius:20px; padding:28px; max-width:300px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+.modal-icon { font-size:40px; margin-bottom:8px; }
+.modal h3 { font-size:17px; font-weight:900; color:#2c3e50; margin-bottom:8px; }
+.modal p { font-size:13px; color:#7f8c8d; margin-bottom:18px; }
+.modal-btns { display:flex; gap:10px; }
+.modal-btns button { flex:1; padding:11px; border:none; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.m-cancel { background:#f4f8f8; color:#7f8c8d; }
+.m-confirm { background:#e74c3c; color:white; }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:#2c3e50; color:white; padding:11px 22px; border-radius:10px; font-size:13px; font-weight:700; transition:transform 0.3s; z-index:9999; white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.ok { background:#27ae60; }
+.toast.err { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -125,14 +142,29 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
           <th>الدرجة</th>
           <th>النسبة</th>
           <th>التاريخ</th>
+          <th>حذف</th>
         </tr>
       </thead>
       <tbody id="tbl-body">
-        <tr><td colspan="8"><div class="center-msg"><div class="icon">⏳</div>جاري التحميل...</div></td></tr>
+        <tr><td colspan="9"><div class="center-msg"><div class="icon">⏳</div>جاري التحميل...</div></td></tr>
       </tbody>
     </table>
   </div>
 </div>
+
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <h3>حذف السجل</h3>
+    <p>هل أنت متأكدة؟ لا يمكن التراجع.</p>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal()">إلغاء</button>
+      <button class="m-confirm" onclick="doDelete()">حذف</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
 const SUPABASE_URL = 'https://jrhhjvnmylwpdjklvcbf.supabase.co';
@@ -156,7 +188,7 @@ async function load(){
     updateStats(allData);
   } catch(e) {
     document.getElementById('tbl-body').innerHTML =
-      '<tr><td colspan="8"><div class="center-msg"><div class="icon">❌</div>تعذر الاتصال</div></td></tr>';
+      '<tr><td colspan="9"><div class="center-msg"><div class="icon">❌</div>تعذر الاتصال</div></td></tr>';
   }
 }
 
@@ -173,7 +205,7 @@ function render(d){
   document.getElementById('tbl-title').textContent = '📋 نتائج الطلاب ('+d.length+')';
   if(!d.length){
     document.getElementById('tbl-body').innerHTML =
-      '<tr><td colspan="8"><div class="center-msg"><div class="icon">📭</div>لا توجد نتائج</div></td></tr>';
+      '<tr><td colspan="9"><div class="center-msg"><div class="icon">📭</div>لا توجد نتائج</div></td></tr>';
     return;
   }
   var rows = '';
@@ -191,6 +223,7 @@ function render(d){
     rows += '<td>'+r.score+'/'+r.total+'</td>';
     rows += '<td><span class="badge '+bc+'">'+pct+'%</span></td>';
     rows += '<td>'+dt+'</td>';
+    rows += '<td><button class="btn-del" onclick="askDel(\"'+r.created_at+'\")">🗑️</button></td>';
     rows += '</tr>';
   }
   document.getElementById('tbl-body').innerHTML = rows;
@@ -234,6 +267,28 @@ function exportCSV(){
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
   a.download = 'نتائج.csv';
   a.click();
+}
+
+
+var delId = null;
+function askDel(id){ delId=id; document.getElementById('overlay').classList.add('on'); }
+function closeModal(){ delId=null; document.getElementById('overlay').classList.remove('on'); }
+async function doDelete(){
+  if(!delId) return;
+  closeModal();
+  try{
+    var res = await fetch(SUPABASE_URL+'/rest/v1/ashjan_results?created_at=eq.'+encodeURIComponent(delId), {
+      method: 'DELETE',
+      headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY, 'Prefer': 'return=minimal'}
+    });
+    if(res.ok || res.status===204){ toast('✅ تم الحذف','ok'); load(); }
+    else { toast('❌ فشل الحذف '+res.status,'err'); }
+  } catch(e){ toast('❌ خطأ في الاتصال','err'); }
+}
+function toast(msg,type){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(type||'')+' show';
+  setTimeout(function(){ el.classList.remove('show'); },3000);
 }
 
 load();
