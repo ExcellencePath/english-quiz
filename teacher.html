@@ -41,14 +41,6 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
 .badge-poor { background:#fadbd8; color:#e74c3c; }
 .center-msg { text-align:center; padding:40px; color:#7f8c8d; font-size:14px; }
 .center-msg .icon { font-size:40px; margin-bottom:8px; }
-.modal { background:white; border-radius:20px; padding:28px; max-width:300px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
-.modal-icon { font-size:40px; margin-bottom:8px; }
-.modal h3 { font-size:17px; font-weight:900; color:#2c3e50; margin-bottom:8px; }
-.modal p { font-size:13px; color:#7f8c8d; margin-bottom:18px; }
-.modal-btns { display:flex; gap:10px; }
-.modal-btns button { flex:1; padding:11px; border:none; border-radius:10px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
-.m-cancel { background:#f4f8f8; color:#7f8c8d; }
-.m-confirm { background:#e74c3c; color:white; }
 </style>
 </head>
 <body>
@@ -112,15 +104,6 @@ tbody td { padding:11px 14px; color:#2c3e50; white-space:nowrap; }
     </table>
   </div>
 </div>
-
-  <div class="modal">
-    <div class="modal-icon">🗑️</div>
-    <p>هل أنت متأكدة؟ لا يمكن التراجع.</p>
-    <div class="modal-btns">
-    </div>
-  </div>
-</div>
-
 
 <script>
 var SUPABASE_URL = 'https://jrhhjvnmylwpdjklvcbf.supabase.co';
@@ -214,27 +197,6 @@ function resetF() {
   document.getElementById('f-name').value = '';
   document.getElementById('f-class').innerHTML = '<option value="">جميع الفصول</option>';
   render(allData); updateStats(allData);
-}
-
-}
-
-}
-
-    method: 'DELETE',
-    headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=minimal'}
-  }).then(function(r){
-    if (r.ok || r.status === 204) {
-      load();
-    } else {
-    }
-  }).catch(function(){
-    showToast('❌ تعذر الاتصال', 'err');
-  });
-}
-
-function showToast(msg, type) {
-  el.textContent = msg;
-  setTimeout(function(){ el.classList.remove('show'); }, 3000);
 }
 
 function exportCSV() {
